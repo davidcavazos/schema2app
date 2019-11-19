@@ -7,27 +7,18 @@ import 'src/builtin.dart';
 export 'src/builtin.dart';
 
 class App extends StatelessWidget {
-  final String name;
-  final Widget root;
-  App(this.name, root) : root = infer(root);
+  final String title;
+  final Component root;
+  App(this.title, [root]) : root = Component.from(root);
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: name,
+        title: title,
         home: Scaffold(
-          appBar: AppBar(title: Text(name)),
+          appBar: AppBar(title: Text(title)),
           body: root,
         ),
       );
-
-  static Widget infer(x) {
-    if (x is Widget) return x;
-    switch (x.runtimeType) {
-      case String:
-        return TextComponent(x);
-    }
-    throw 'Could not infer type ${x.runtimeType}';
-  }
 
   void run() => runApp(this);
 }

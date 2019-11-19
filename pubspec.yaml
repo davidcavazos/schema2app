@@ -1,5 +1,5 @@
 name: schema2app
-description: Convert a schema to a working app.
+description: Convert a schema declaration into an app.
 version: 0.0.2
 author: David Cavazos <dcavazosw@gmail.com>
 homepage: https://github.com/davidcavazos/schema2app
@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  quiver: any
+  yaml: any
 
 dev_dependencies:
   flutter_test:

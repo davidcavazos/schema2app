@@ -1,35 +1,46 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' show SizedBox;
 import 'package:schema2app/schema2app.dart';
 
-class EmptyComponent extends Component {
-  EmptyComponent() : super(value: null, label: '', editable: false);
+class Empty extends Component {
+  Empty()
+      : super(
+          null,
+          label: null,
+          align: null,
+          editable: null,
+          notifier: null,
+        );
+
+  @override
+  Null get data => super.data;
+  @override
+  Null get value => data;
 
   Map<String, dynamic> toMap() => {'type': 'Empty'};
 
-  static EmptyComponent fromMap(Map<String, dynamic> map) => EmptyComponent();
+  static Empty fromMap(Map<String, dynamic> map) => Empty();
 
-  static EmptyComponent fromJson(String source) => fromMap(json.decode(source));
+  static Empty fromJson(String source) => fromMap(json.decode(source));
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is EmptyComponent;
+    return other is Empty;
   }
 
   @override
-  int get hashCode => 0;
+  int get hashCode => value.hashCode;
 
   @override
-  Null get data => super.data;
-  Null get value => data;
+  Widget build(BuildContext context) => null;
 
   @override
-  State<StatefulWidget> createState() => _EmptyComponentState();
+  State<StatefulWidget> createState() => _EmptyState();
 }
 
-class _EmptyComponentState extends State<EmptyComponent> {
+class _EmptyState extends State<Empty> {
   @override
   Widget build(BuildContext context) => SizedBox.shrink();
 }

@@ -1,27 +1,59 @@
 import 'package:schema2app/schema2app.dart';
 
 void main() {
-  var counter = NumberComponent();
-  var app = App(
+  var counter = Component.from(0);
+
+  App(
     'Hello schema2app',
-    [
-      "Here's the value of the counter so far:",
-      counter,
-      ActionComponent(
-        'Add',
-        function: () => print('Hello!'),
+    Section(
+      [
+        Text.h3('Hello schema2app'),
+        Comment('This is a comment, and is ignored'),
+        Section(
+          [
+            'You have pushed the button this many times:',
+            Text.h4(counter),
+          ],
+          align: Alignment.center,
+        ),
+      ],
+      floating: Button(
+        () {
+          counter.value++;
+        },
+        // icon: Icon.add,
+        label: 'Add',
+        align: Alignment.bottomRight,
       ),
-    ],
-  );
-  app.run();
+    ),
+  ).run();
 }
 
-// void main() => App(
-//     'Hello schema2app!',
-//     ActionComponent(
-//       'Run',
-//       inputs: {
-//         'name': 'schema2app',
-//       },
-//       function: (inputs) => 'Hello ${inputs['name']}!',
-//     )).run();
+/* ===--- app.mdc ---=== *\
+---
+counter: 0
+n: 1
+---
+
+# Hello schema2app
+
+{# This is a comment, and is ignored }
+
+{: align=center align-vertical=center }
+'''
+  You have pushed the button this many times:
+
+  ## ${counter}
+'''
+
+{@ floating }
+{{ Button increment-counter(n) icon=add }}
+*/
+
+/* ===--- main.dart ---=== *\
+void main() => run('app.md', {
+  'increment-counter': (fields) {
+    fields['counter']++;
+  },
+});
+*/

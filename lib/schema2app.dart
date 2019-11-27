@@ -1,10 +1,31 @@
 library schema2app;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
-import 'src/builtin.dart';
+import 'src/component.dart';
+import 'src/text.dart';
 
-export 'src/builtin.dart';
+// exports
+export 'src/flutter_exports.dart';
+
+export 'src/component.dart';
+
+export 'src/empty.dart';
+export 'src/boolean.dart';
+export 'src/integer.dart';
+export 'src/number.dart';
+export 'src/text.dart';
+
+export 'src/item_list.dart';
+export 'src/item_set.dart';
+export 'src/item_dict.dart';
+
+export 'src/button.dart';
+
+export 'src/section.dart';
+export 'src/comment.dart';
+
+export 'src/widget.dart';
 
 class App extends StatelessWidget {
   final String title;

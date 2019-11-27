@@ -1,34 +1,56 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/widgets.dart' show SizedBox;
 import 'package:schema2app/schema2app.dart';
 
 class WidgetComponent extends Component {
-  WidgetComponent({Widget widget, String label, bool editable})
-      : super(
-          value: widget ?? SizedBox.shrink(),
+  WidgetComponent(
+    Widget widget, {
+    String label,
+    Alignment align,
+    bool editable,
+    ValueNotifier notifier,
+  }) : super(
+          widget ?? SizedBox.shrink(),
           label: label,
+          align: align,
           editable: editable,
+          notifier: notifier,
         );
 
-  WidgetComponent copyWith({Widget widget, bool editable}) => WidgetComponent(
-        widget: widget ?? this.widget,
+  @override
+  Widget get data => super.data;
+  @override
+  Widget get value => data;
+  Widget get widget => data;
+
+  WidgetComponent copyWith({
+    Widget widget,
+    String label,
+    Alignment align,
+    bool editable,
+    ValueNotifier notifier,
+  }) =>
+      WidgetComponent(
+        widget ?? this.widget,
         label: label ?? this.label,
+        align: align ?? this.align,
         editable: editable ?? this.editable,
+        notifier: notifier ?? this.notifier,
       );
 
   Map<String, dynamic> toMap() => {
         'type': 'Widget',
         'widget': widget.toString(),
-        'label': label,
-        'editable': editable,
+        ...toMap(),
       };
 
   static WidgetComponent fromMap(Map<String, dynamic> map) {
     if (map == null) map = {};
     return WidgetComponent(
-      widget: map['widget'],
+      map['widget'],
       label: map['label'],
+      align: alignFromMap(map['align']),
       editable: map['editable'],
     );
   }
@@ -41,23 +63,12 @@ class WidgetComponent extends Component {
     if (identical(this, other)) return true;
     return other is WidgetComponent &&
         other.widget == widget &&
-        other.label == label &&
-        other.editable == editable;
+        baseEquals(other);
   }
 
   @override
-  int get hashCode => widget.hashCode ^ label.hashCode ^ editable.hashCode;
+  int get hashCode => widget.hashCode ^ baseHashCode;
 
   @override
-  Widget get data => super.data;
-  Widget get value => data;
-  Widget get widget => data;
-
-  @override
-  State<StatefulWidget> createState() => _WidgetComponentState();
-}
-
-class _WidgetComponentState extends State<WidgetComponent> {
-  @override
-  Widget build(BuildContext context) => widget.widget;
+  Widget build(BuildContext context) => widget;
 }

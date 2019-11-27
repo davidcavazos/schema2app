@@ -1,60 +1,77 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:schema2app/schema2app.dart';
 
-class BooleanComponent extends Component {
-  BooleanComponent({bool value, String label, bool editable})
-      : super(value: value ?? false, label: label, editable: editable);
+// TODO: add methods:
+// - toggle
 
-  BooleanComponent copyWith({bool value, bool editable}) => BooleanComponent(
-        value: value ?? this.value,
+class Boolean extends Component {
+  Boolean(
+    bool value, {
+    Alignment align,
+    String label,
+    bool editable,
+    ValueNotifier notifier,
+  }) : super(
+          value ?? false,
+          align: align,
+          label: label,
+          editable: editable,
+          notifier: notifier,
+        );
+
+  @override
+  bool get data => super.data;
+  @override
+  bool get value => data;
+
+  Boolean copyWith({
+    bool value,
+    String label,
+    Alignment align,
+    bool editable,
+    ValueNotifier notifier,
+  }) =>
+      Boolean(
+        value ?? this.value,
         label: label ?? this.label,
+        align: align ?? this.align,
         editable: editable ?? this.editable,
+        notifier: notifier ?? this.notifier,
       );
 
   Map<String, dynamic> toMap() => {
         'type': 'Boolean',
         'value': value,
-        'label': label,
-        'editable': editable,
+        ...baseToMap(),
       };
 
-  static BooleanComponent fromMap(Map<String, dynamic> map) {
+  static Boolean fromMap(Map<String, dynamic> map) {
     if (map == null) map = {};
-    return BooleanComponent(
-      value: map['value'],
+    return Boolean(
+      map['value'],
       label: map['label'],
+      align: alignFromMap(map['align']),
       editable: map['editable'],
     );
   }
 
-  static BooleanComponent fromJson(String source) =>
-      fromMap(json.decode(source));
+  static Boolean fromJson(String source) => fromMap(json.decode(source));
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is BooleanComponent &&
-        other.value == value &&
-        other.label == label &&
-        other.editable == editable;
+    return other is Boolean && other.value == value && baseEquals(other);
   }
 
   @override
-  int get hashCode => value.hashCode ^ label.hashCode ^ editable.hashCode;
+  int get hashCode => value.hashCode ^ baseHashCode;
 
   @override
-  bool get data => super.data;
-  bool get value => data;
-
-  @override
-  State<StatefulWidget> createState() => _BooleanComponentState();
-}
-
-class _BooleanComponentState extends State<BooleanComponent> {
-  @override
-  Widget build(BuildContext context) {
-    return Text('Boolean: ${widget.value}');
-  }
+  Widget build(BuildContext context) => Text(
+        "$value",
+        label: label,
+        align: align,
+        editable: editable,
+      );
 }

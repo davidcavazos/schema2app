@@ -1,18 +1,33 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
-import 'package:schema2app/src/builtin.dart';
+import 'package:schema2app/schema2app.dart';
+
+// TODO: toMap/fromMap on notifier
 
 abstract class Component extends StatefulWidget {
-  final ValueNotifier _notifier;
+  final ValueNotifier notifier;
+  final Alignment align;
   final String label;
   final bool editable;
-  Component({@required value, @required String label, @required bool editable})
-      : _notifier = value is ValueNotifier
-            ? value
-            : value is Component ? value._notifier : ValueNotifier(value),
+  Component(
+    value, {
+    @required Alignment align,
+    @required String label,
+    @required bool editable,
+    @required ValueNotifier notifier,
+  })  : notifier = notifier ??
+            (value is ValueNotifier
+                ? value
+                : value is Component ? value.notifier : ValueNotifier(value)),
+        align = align ?? Alignment.topLeft,
         label = label ?? '',
         editable = editable ?? false;
+
+  get data => notifier.value;
+  get value => data;
+
+  set data(newValue) => notifier.value = newValue;
+  set value(newValue) => data = newValue;
 
   static final _lowerToUpperLetter = RegExp(r'([a-z])([A-Z])');
   static final _accronyms = RegExp(r'([A-Z]+)([A-Z][a-z]+)');
@@ -35,37 +50,30 @@ abstract class Component extends StatefulWidget {
     if (value is Component) return value;
 
     // Check for data types.
-    if (value == null) return EmptyComponent();
-    if (value == bool) return BooleanComponent(editable: editable);
-    if (value == int) return IntegerComponent(editable: editable);
-    if (value == num) return NumberComponent(label: label, editable: editable);
-    if (value == String) return TextComponent(label: label, editable: editable);
-    if (value == List) return ListComponent(label: label, editable: editable);
+    if (value == null) return Empty();
+    if (value == bool) return Boolean(false, label: label, editable: editable);
+    if (value == int) return Integer(0, label: label, editable: editable);
+    if (value == num) return Number(0.0, label: label, editable: editable);
+    if (value == String) return Text('', label: label, editable: editable);
+    if (value == List) return ItemList([], label: label, editable: editable);
+    if (value == Set) return ItemSet([], label: label, editable: editable);
+    if (value == Map) return ItemDict({}, label: label, editable: editable);
 
     // Check for values.
-    if (value is bool)
-      return BooleanComponent(value: value, label: label, editable: editable);
-    if (value is int)
-      return IntegerComponent(value: value, label: label, editable: editable);
-    if (value is num)
-      return NumberComponent(value: value, label: label, editable: editable);
-    if (value is String)
-      return TextComponent(value: value, label: label, editable: editable);
-    if (value is Set)
-      return SetComponent(values: value, label: label, editable: editable);
-    if (value is Map)
-      return DictComponent(pairs: value, label: label, editable: editable);
-    if (value is Iterable)
-      return ListComponent(values: value, label: label, editable: editable);
+    if (value is bool) return Boolean(value, label: label, editable: editable);
+    if (value is int) return Integer(value, label: label, editable: editable);
+    if (value is num) return Number(value, label: label, editable: editable);
+    if (value is String) return Text(value, label: label, editable: editable);
+    if (value is Set) return ItemSet(value, label: label, editable: editable);
+    if (value is Map) return ItemDict(value, label: label, editable: editable);
+    if (value is Iterable) // must be after all other iterables.
+      return ItemList(value, label: label, editable: editable);
     if (value is Widget)
-      return WidgetComponent(widget: value, label: label, editable: editable);
+      return WidgetComponent(value, label: label, editable: editable);
 
     throw UnsupportedError(
         'Component type not supported: ${value.runtimeType}');
   }
-
-  get data => _notifier.value;
-  get value;
 
   Map<String, dynamic> toMap();
 
@@ -74,26 +82,59 @@ abstract class Component extends StatefulWidget {
       throw UnsupportedError('Component type not defined');
     switch (map['type']) {
       case 'Empty':
-        return EmptyComponent();
+        return Empty();
       case 'Boolean':
-        return BooleanComponent.fromMap(map);
+        return Boolean.fromMap(map);
       case 'Integer':
-        return IntegerComponent.fromMap(map);
+        return Integer.fromMap(map);
       case 'Number':
-        return NumberComponent.fromMap(map);
+        return Number.fromMap(map);
       case 'Text':
-        return TextComponent.fromMap(map);
+        return Text.fromMap(map);
       case 'List':
-        return ListComponent.fromMap(map);
+        return ItemList.fromMap(map);
       case 'Set':
-        return SetComponent.fromMap(map);
+        return ItemSet.fromMap(map);
       case 'Dict':
-        return DictComponent.fromMap(map);
-      case 'Action':
-        return ActionComponent.fromMap(map);
+        return ItemDict.fromMap(map);
+      case 'Button':
+        return Button.fromMap(map);
     }
     throw UnsupportedError("Component type not supported: ${map['type']}");
   }
 
   String toJson() => json.encode(toMap());
+
+  @protected
+  Map<String, dynamic> baseToMap() => {
+        'label': label,
+        'align': alignToMap(align),
+        'editable': editable,
+      };
+
+  @protected
+  bool baseEquals(Object other) {
+    if (identical(this, other)) return true;
+    return other is Component &&
+        other.label == label &&
+        alignEquals(other.align, align) &&
+        other.editable == editable;
+  }
+
+  @protected
+  int get baseHashCode =>
+      label.hashCode ^ alignHashCode(align) ^ editable.hashCode;
+
+  Widget build(BuildContext context);
+
+  @override
+  State<StatefulWidget> createState() => ComponentState();
+}
+
+class ComponentState extends State<Component> {
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder(
+        valueListenable: widget.notifier,
+        builder: (context, value, child) => widget.build(context),
+      );
 }

@@ -1,0 +1,44 @@
+import 'dart:convert';
+
+class Align {
+  final double x;
+  final double y;
+  const Align([double x, double y])
+      : x = x ?? -1,
+        y = y ?? -1;
+
+  static const Align topLeft = Align(-1, -1);
+  static const Align topCenter = Align(0, -1);
+  static const Align topRight = Align(1, -1);
+  static const Align centerLeft = Align(-1, 0);
+  static const Align center = Align(0, 0);
+  static const Align centerRight = Align(1, 0);
+  static const Align bottomLeft = Align(-1, 1);
+  static const Align bottomCenter = Align(0, 1);
+  static const Align bottomRight = Align(1, 1);
+
+  Align copyWith({double x, double y}) => Align(x ?? this.x, y ?? this.y);
+
+  Map<String, dynamic> toMap() => {'x': x, 'y': y};
+
+  static Align fromMap(Map<String, dynamic> map) {
+    if (map == null) return Align();
+    return Align(map['x'], map['y']);
+  }
+
+  String toJson() => json.encode(toMap());
+
+  static Align fromJson(String source) => fromMap(json.decode(source));
+
+  @override
+  String toString() => 'Align($x, $y)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Align && other.x == x && other.y == y;
+  }
+
+  @override
+  int get hashCode => x.hashCode ^ y.hashCode;
+}

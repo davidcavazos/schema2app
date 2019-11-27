@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart' as w;
+import 'package:flutter/widgets.dart' as flutter;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:schema2app/schema2app.dart';
@@ -40,91 +40,79 @@ void main() {
   });
 
   test("Component.from: EmptyComponent as EmptyComponent", () {
-    expect(Component.from(EmptyComponent()), EmptyComponent());
+    expect(Component.from(Empty()), Empty());
   });
   test("Component.from: NumberComponent as NumberComponent", () {
-    expect(Component.from(NumberComponent()), NumberComponent());
+    expect(Component.from(Number(3.14)), Number(3.14));
   });
 
   test("Component.from: null as Empty", () {
-    expect(Component.from(null), EmptyComponent());
+    expect(Component.from(null), Empty());
   });
   test("Component.from: bool as Boolean", () {
-    expect(Component.from(bool), BooleanComponent());
+    expect(Component.from(bool), Boolean(false));
   });
   test("Component.from: int as Integer", () {
-    expect(Component.from(int), IntegerComponent());
+    expect(Component.from(int), Integer(0));
   });
   test("Component.from: num as Number", () {
-    expect(Component.from(num), NumberComponent());
+    expect(Component.from(num), Number(0.0));
   });
   test("Component.from: String as Text", () {
-    expect(Component.from(String), TextComponent());
+    expect(Component.from(String), Text(''));
   });
   test("Component.from: List as List", () {
-    expect(Component.from(List), ListComponent());
+    expect(Component.from(List), ItemList([]));
   });
 
   test("Component.from: false as Boolean", () {
-    expect(Component.from(false), BooleanComponent(value: false));
+    expect(Component.from(false), Boolean(false));
   });
   test("Component.from: true as Boolean", () {
-    expect(Component.from(true), BooleanComponent(value: true));
+    expect(Component.from(true), Boolean(true));
   });
   test("Component.from: 42 as Integer", () {
-    expect(Component.from(42), IntegerComponent(value: 42));
+    expect(Component.from(42), Integer(42));
   });
   test("Component.from: 3.14 as Number", () {
-    expect(Component.from(3.14), NumberComponent(value: 3.14));
+    expect(Component.from(3.14), Number(3.14));
   });
   test("Component.from: 'text' as Text", () {
-    expect(Component.from('text'), TextComponent(value: 'text'));
+    expect(Component.from('text'), Text('text'));
   });
 
   test("Component.from: [] as List", () {
-    expect(Component.from([]), ListComponent());
+    expect(Component.from([]), ItemList([]));
   });
   test("Component.from: ['a', 'b', 'c'] as List", () {
-    expect(
-        Component.from(['a', 'b', 'c']),
-        ListComponent(values: [
-          TextComponent(value: 'a'),
-          TextComponent(value: 'b'),
-          TextComponent(value: 'c'),
-        ]));
+    expect(Component.from(['a', 'b', 'c']),
+        ItemList([Text('a'), Text('b'), Text('c')]));
   });
 
   test("Component.from: Set() as Set", () {
-    expect(Component.from(Set()), SetComponent());
+    expect(Component.from(Set()), ItemSet([]));
   });
   test("Component.from: {'a', 'b', 'c'} as Set", () {
-    expect(
-        Component.from({'a', 'b', 'c'}),
-        SetComponent(values: {
-          TextComponent(value: 'a'),
-          TextComponent(value: 'b'),
-          TextComponent(value: 'c'),
-        }));
+    expect(Component.from({'a', 'b', 'c'}),
+        ItemSet({Text('a'), Text('b'), Text('c')}));
   });
 
   test("Component.from: {} as Dict", () {
-    expect(Component.from({}), DictComponent());
+    expect(Component.from({}), ItemDict({}));
   });
   test("Component.from: {'integer': 42, 'text': 'hello'} as Dict", () {
     expect(
       Component.from({'integer': 42, 'text': 'hello'}),
-      DictComponent(
-        pairs: {
-          'integer': IntegerComponent(value: 42),
-          'text': TextComponent(value: 'hello'),
-        },
-      ),
+      ItemDict({'integer': Integer(42), 'text': Text('hello')}),
     );
   });
 
   test("Component.from: Widget", () {
-    expect((Component.from(w.Text('text')) as WidgetComponent).value.toString(),
-        WidgetComponent(widget: w.Text('text')).value.toString());
+    expect(
+        (Component.from(flutter.Text('text')) as WidgetComponent)
+            .value
+            .toString(),
+        WidgetComponent(flutter.Text('text')).value.toString());
   });
 
   // Component.fromMap
@@ -137,28 +125,24 @@ void main() {
   });
 
   test("Component.fromMap: Empty", () {
-    expect(Component.fromMap({'type': 'Number', 'value': 3.14}),
-        NumberComponent(value: 3.14));
+    expect(Component.fromMap({'type': 'Number', 'value': 3.14}), Number(3.14));
   });
   test("Component.fromMap: Boolean", () {
-    expect(Component.fromMap({'type': 'Boolean', 'value': true}),
-        BooleanComponent(value: true));
+    expect(
+        Component.fromMap({'type': 'Boolean', 'value': true}), Boolean(true));
   });
   test("Component.fromMap: Integer", () {
-    expect(Component.fromMap({'type': 'Integer', 'value': 42}),
-        IntegerComponent(value: 42));
+    expect(Component.fromMap({'type': 'Integer', 'value': 42}), Integer(42));
   });
   test("Component.fromMap: Number", () {
-    expect(Component.fromMap({'type': 'Number', 'value': 3.14}),
-        NumberComponent(value: 3.14));
+    expect(Component.fromMap({'type': 'Number', 'value': 3.14}), Number(3.14));
   });
   test("Component.fromMap: Text", () {
-    expect(Component.fromMap({'type': 'Text', 'value': 'text'}),
-        TextComponent(value: 'text'));
+    expect(Component.fromMap({'type': 'Text', 'value': 'text'}), Text('text'));
   });
 
   test("Component.fromMap: List empty", () {
-    expect(Component.fromMap({'type': 'List'}), ListComponent());
+    expect(Component.fromMap({'type': 'List'}), ItemList([]));
   });
   test("Component.fromMap: List", () {
     expect(
@@ -170,15 +154,11 @@ void main() {
             {'type': 'Text', 'value': 'c'},
           ],
         }),
-        ListComponent(values: [
-          TextComponent(value: 'a'),
-          TextComponent(value: 'b'),
-          TextComponent(value: 'c'),
-        ]));
+        ItemList([Text('a'), Text('b'), Text('c')]));
   });
 
   test("Component.fromMap: Set empty", () {
-    expect(Component.fromMap({'type': 'Set'}), SetComponent());
+    expect(Component.fromMap({'type': 'Set'}), ItemSet([]));
   });
   test("Component.fromMap: Set", () {
     expect(
@@ -190,15 +170,11 @@ void main() {
             {'type': 'Text', 'value': 'c'},
           },
         }),
-        SetComponent(values: {
-          TextComponent(value: 'a'),
-          TextComponent(value: 'b'),
-          TextComponent(value: 'c'),
-        }));
+        ItemSet({Text('a'), Text('b'), Text('c')}));
   });
 
   test("Component.fromMap: Dict empty", () {
-    expect(Component.fromMap({'type': 'Dict'}), DictComponent());
+    expect(Component.fromMap({'type': 'Dict'}), ItemDict({}));
   });
   test("Component.fromMap: Dict", () {
     expect(
@@ -209,27 +185,21 @@ void main() {
             'text': {'type': 'Text', 'value': 'hello'},
           },
         }),
-        DictComponent(pairs: {
-          'integer': IntegerComponent(value: 42),
-          'text': TextComponent(value: 'hello'),
-        }));
+        ItemDict({'integer': Integer(42), 'text': Text('hello')}));
   });
 
-  test("Component.fromMap: Action", () {
+  test("Component.fromMap: Button", () {
     greet(name) => 'Hello $name!';
     expect(
         Component.fromMap({
-          'type': 'Action',
-          'name': 'Greet',
-          'inputs': {'name': String},
-          'outputs': String,
+          'type': 'Button',
           'function': greet,
+          'inputs': {'name': String},
         }).toJson(),
-        ActionComponent(
-          'Greet',
-          inputs: {'name': TextComponent(label: 'name', editable: true)},
-          outputs: TextComponent(),
-          function: greet,
+        Button(
+          greet,
+          inputs: {'name': Text('', label: 'name', editable: true)},
+          label: 'Run',
         ).toJson());
   });
 }

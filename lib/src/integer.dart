@@ -1,60 +1,80 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:schema2app/schema2app.dart';
 
-class IntegerComponent extends Component {
-  IntegerComponent({int value, String label, bool editable})
-      : super(value: value ?? 0, label: label, editable: editable);
+// TODO: add increment/decrement buttons
+//       https://stackoverflow.com/questions/57914542/is-there-a-number-input-field-in-flutter-with-increment-decrement-buttons-attach
+//       https://stackoverflow.com/questions/50044618/how-to-increment-counter-for-a-specific-list-item-in-flutter
 
-  IntegerComponent copyWith({int value, bool editable}) => IntegerComponent(
-        value: value ?? this.value,
+class Integer extends Text {
+  Integer(
+    int value, {
+    List<TextInputFormatter> inputFormatters,
+    TextInputType keyboard,
+    TextStyle style,
+    String label,
+    Alignment align,
+    bool editable,
+    TextEditingController notifier,
+  }) : super(
+          '${value ?? 0}',
+          inputFormatters:
+              inputFormatters ?? [WhitelistingTextInputFormatter.digitsOnly],
+          keyboard: keyboard ?? TextInputType.number,
+          style: style,
+          label: label,
+          align: align,
+          editable: editable,
+          notifier: notifier,
+        );
+
+  @override
+  int get value => int.parse(data);
+
+  Integer copyWith({
+    value,
+    List<TextInputFormatter> inputFormatters,
+    TextInputType keyboard,
+    TextStyle style,
+    String label,
+    Alignment align,
+    bool editable,
+    TextEditingController notifier,
+  }) =>
+      Integer(
+        value ?? this.value,
+        inputFormatters: inputFormatters ?? this.inputFormatters,
+        keyboard: keyboard ?? this.keyboard,
+        style: style ?? this.style,
         label: label ?? this.label,
+        align: align ?? this.align,
         editable: editable ?? this.editable,
+        notifier: notifier ?? this.notifier,
       );
 
   Map<String, dynamic> toMap() => {
+        ...super.toMap(),
         'type': 'Integer',
-        'value': value,
-        'label': label,
-        'editable': editable,
       };
 
-  static IntegerComponent fromMap(Map<String, dynamic> map) {
+  static Integer fromMap(Map<String, dynamic> map) {
     if (map == null) map = {};
-    return IntegerComponent(
-      value: map['value'],
+    return Integer(
+      map['value'],
       label: map['label'],
+      align: alignFromMap(map['align']),
       editable: map['editable'],
     );
   }
 
-  static IntegerComponent fromJson(String source) =>
-      fromMap(json.decode(source));
+  static Integer fromJson(String source) => fromMap(json.decode(source));
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is IntegerComponent &&
-        other.value == value &&
-        other.label == label &&
-        other.editable == editable;
+    return other is Integer && other.value == value && baseEquals(other);
   }
 
   @override
-  int get hashCode => value.hashCode ^ label.hashCode ^ editable.hashCode;
-
-  @override
-  int get data => super.data;
-  int get value => data;
-
-  @override
-  State<StatefulWidget> createState() => _IntegerComponentState();
-}
-
-class _IntegerComponentState extends State<IntegerComponent> {
-  @override
-  Widget build(BuildContext context) {
-    return Text('Integer: ${widget.value}');
-  }
+  int get hashCode => value.hashCode ^ baseHashCode;
 }

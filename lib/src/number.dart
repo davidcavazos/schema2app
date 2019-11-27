@@ -1,60 +1,81 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:schema2app/schema2app.dart';
 
-class NumberComponent extends Component {
-  NumberComponent({double value, String label, bool editable})
-      : super(value: value ?? 0.0, label: label, editable: editable);
+// TODO: add keyboard and formatters
+//       https://stackoverflow.com/questions/55631224/flutter-textfield-input-only-decimal-numbers
+// TODO: implement a proper inputFormatter
 
-  NumberComponent copyWith({double value, bool editable}) => NumberComponent(
-        value: value ?? this.value,
+class Number extends Text {
+  Number(
+    double value, {
+    List<TextInputFormatter> inputFormatters,
+    TextInputType keyboard,
+    TextStyle style,
+    String label,
+    Alignment align,
+    bool editable,
+    TextEditingController notifier,
+  }) : super(
+          '${value ?? 0.0}',
+          inputFormatters: inputFormatters,
+          keyboard: keyboard ??
+              TextInputType.numberWithOptions(decimal: true, signed: true),
+          style: style,
+          label: label,
+          align: align,
+          editable: editable,
+          notifier: notifier,
+        );
+
+  @override
+  double get value => double.parse(data);
+
+  Number copyWith({
+    value,
+    List<TextInputFormatter> inputFormatters,
+    TextInputType keyboard,
+    TextStyle style,
+    String label,
+    Alignment align,
+    bool editable,
+    TextEditingController notifier,
+  }) =>
+      Number(
+        value ?? this.value,
+        inputFormatters: inputFormatters ?? this.inputFormatters,
+        keyboard: keyboard ?? this.keyboard,
+        style: style ?? this.style,
         label: label ?? this.label,
+        align: align ?? this.align,
         editable: editable ?? this.editable,
+        notifier: notifier ?? this.notifier,
       );
 
   Map<String, dynamic> toMap() => {
+        ...super.toMap(),
         'type': 'Number',
-        'value': value,
-        'label': label,
-        'editable': editable,
       };
 
-  static NumberComponent fromMap(Map<String, dynamic> map) {
+  static Number fromMap(Map<String, dynamic> map) {
     if (map == null) map = {};
-    return NumberComponent(
-      value: map['value'],
+    return Number(
+      map['value'],
       label: map['label'],
+      align: alignFromMap(map['align']),
       editable: map['editable'],
     );
   }
 
-  static NumberComponent fromJson(String source) =>
-      fromMap(json.decode(source));
+
+  static Number fromJson(String source) => fromMap(json.decode(source));
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is NumberComponent &&
-        other.value == value &&
-        other.label == label &&
-        other.editable == editable;
+    return other is Number && other.value == value && baseEquals(other);
   }
 
   @override
-  int get hashCode => value.hashCode ^ label.hashCode ^ editable.hashCode;
-
-  @override
-  double get data => super.data;
-  double get value => data;
-
-  @override
-  State<StatefulWidget> createState() => _NumberComponentState();
-}
-
-class _NumberComponentState extends State<NumberComponent> {
-  @override
-  Widget build(BuildContext context) {
-    return Text('Number: ${widget.value}');
-  }
+  int get hashCode => value.hashCode ^ baseHashCode;
 }
